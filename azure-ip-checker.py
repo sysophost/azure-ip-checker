@@ -25,7 +25,7 @@ def check_in_range(azure_json: str, target_ip: str):
                 subnet = ip_network(address_prefix)
 
                 if ip_address(target_ip) in subnet:
-                    results.append({"service": v["properties"]["systemService"] if v["properties"]["systemService"] else "N/A", "region": v["properties"]["region"] if v["properties"]["region"] else "N/A", "regionId": v["properties"]["regionId"], "address_prefix": address_prefix})
+                    results.append({"service": v["properties"]["systemService"] or "N/A", "region": v["properties"]["region"] or "N/A", "regionId": v["properties"]["regionId"], "address_prefix": address_prefix})
 
         return results
     except:
