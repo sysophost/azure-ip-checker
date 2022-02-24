@@ -33,6 +33,8 @@ def check_in_range(azure_json: str, target_ip: str):
 
 
 if __name__ == "__main__":
+    print("If unexpected results are returned, fetch the latest JSON download URL from https://www.microsoft.com/en-us/download/details.aspx?id=56519 and supply with -j")
+
     azure_json = fetch_azure_json(ARGS.jsonurl)
 
     for ip in ARGS.ipaddress:
