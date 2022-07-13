@@ -2,15 +2,22 @@ import argparse
 from ipaddress import ip_address, ip_network
 
 import requests
+from bs4 import BeautifulSoup
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--ipaddress", "-i", type=str, help="IP address to check", action="append", required=True)
-PARSER.add_argument("--jsonurl", "-j", type=str, default="https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20220221.json", help="Azure JSON data (default: %(default)s)", required=False)
+PARSER.add_argument("--downloadurl", "-d", type=str, default="https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519", help="Azure JSON data (default: %(default)s)", required=False)
 ARGS = PARSER.parse_args()
 
 def fetch_azure_json(url: str) -> str:
     try:
         resp = requests.get(url)
+        resp.raise_for_status()
+
+        soup = BeautifulSoup(resp.content, "html.parser")
+        json_link = soup.find("a", {"data-bi-containername":"download retry"})["href"] 
+
+        resp = requests.get(json_link)
         resp.raise_for_status()
         return resp.json()
 
@@ -33,9 +40,7 @@ def check_in_range(azure_json: str, target_ip: str):
 
 
 if __name__ == "__main__":
-    print("If unexpected results are returned, fetch the latest JSON download URL from https://www.microsoft.com/en-us/download/details.aspx?id=56519 and supply with -j")
-
-    azure_json = fetch_azure_json(ARGS.jsonurl)
+    azure_json = fetch_azure_json(ARGS.downloadurl)
 
     for ip in ARGS.ipaddress:
         if results := check_in_range(azure_json, ip):
